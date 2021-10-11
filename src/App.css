@@ -36,3 +36,19 @@
     transform: rotate(360deg);
   }
 }
+
+.tarjeta{
+  width: 18rem !important; 
+  margin-right: 20px !important; 
+  margin-bottom: 10px !important;
+}
+.fila{
+  float: none; 
+  margin: 0 auto;
+}
+.imagen{
+  width: 100px !important;
+  margin-left: auto;
+  margin-right: auto;
+}
+
