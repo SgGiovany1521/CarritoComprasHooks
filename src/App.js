@@ -17,10 +17,13 @@ function App() {
     { id: 3, imagen: img3, nombre: "Fesca", descripcion: "Un refresco refrescante 3", precio: 12},
     { id: 4, imagen: img4, nombre: "Delaware Punch", descripcion: "Un refresco refrescante 4", precio: 10},
   ];
-
+  var cart = JSON.parse(sessionStorage.getItem("items"));
+  if (cart == null) {
+    cart = [];
+  }
   const [data, setData] = useState(dataProductos);
   const [modalAgregar, setModalAgregar] = useState(false);
-
+  const [modalCarrito, setModalCarrito] = useState(false);
   const [prodSelec, setProducSelec] = useState({
     id: '',
     imagen:'',
@@ -28,6 +31,37 @@ function App() {
     descripcion: '',
     precio: ''
   });
+  const handleChange=e=>{
+    const {name, value}=e.target;
+    setProducSelec((prevState)=>({
+      ...prevState,
+      [name]: value
+    }));
+  }
+  const addToCartBebida =()=>{
+    
+    var total = (parseFloat(prodSelec.cantidad) * parseFloat(prodSelec.precio));
+    let itemCart = {
+      "id": prodSelec.id,
+      "nombre": prodSelec.nombre,
+      "imagen":prodSelec.imagen,
+      "descripcion": prodSelec.descripcion,
+      "cantidad": prodSelec.cantidad,
+      "precio": prodSelec.precio,
+      "total": total,
+    }
+    cart.push(itemCart);
+    sessionStorage.setItem("items", JSON.stringify(cart));
+    setModalAgregar(false);
+    console.log(cart[0]);
+    
+  }
+ 
+  
+  const insertToFirebase=()=>{
+    //insertar a firebase el carrito
+    console.log("Holi prro:v");
+  }
 
   const seleccionarProducto=(elemento)=>{
     setProducSelec(elemento);
@@ -37,10 +71,10 @@ function App() {
   return (
     <div className="App">
       <h1>VENTA DE PRODUCTOS</h1>
-      <div class="fila row p-3 justify-content-center">
+      <div className="fila row p-3 justify-content-center">
           {data.map(elemento=>(
-            <div className="tarjeta card p-2" >
-            <img src={elemento.imagen} className="imagen card-img-top" alt="..."/>
+            <div className=" col tarjeta card p-2 " style={{width: "18rem", marginRight : "20px",marginBottom : "10px"}}>
+            <img  style={{width : '200px', height: "200px" }} src={elemento.imagen} className="imagen card-img-top" alt="..."/>
                 <div class="card-body">
                     <h5 class="card-title">{elemento.nombre}</h5>
                     <p class="card-text">{elemento.descripcion}</p>
@@ -52,14 +86,16 @@ function App() {
           ))
           }
       </div>
+      <button   onClick={()=>setModalCarrito(true)}>carrito</button>
 
-      <Modal isOpen={modalAgregar} >
+      <Modal isOpen={modalAgregar}>
         <ModalHeader>
           <div>
             <h3>Agregar al Carrito: {prodSelec && prodSelec.nombre}</h3>
           </div>
         </ModalHeader>
         <ModalBody>
+
           <div className="form-group">
               <div className="row">
           
@@ -71,9 +107,11 @@ function App() {
                   type="hidden"
                   name="id"
                   value={prodSelec && prodSelec.id}
+                  onChange={handleChange}
+
                 />
                 <br />
-                <img src={prodSelec && prodSelec.imagen} className="imagen card-img-top" alt="..."/>
+                <img  src={prodSelec && prodSelec.imagen} onChange={handleChange} className="imagen card-img-top" alt="..."/>
                 <br />
               </div>
             
@@ -85,6 +123,7 @@ function App() {
                 type="text"
                 name="nombre"
                 value={prodSelec && prodSelec.nombre}
+                onChange={handleChange}
               />
               <br />
 
@@ -95,6 +134,7 @@ function App() {
                 type="text"
                 name="descripcion"
                 value={prodSelec && prodSelec.descripcion}
+                onChange={handleChange}
               />
               <br />
 
@@ -105,6 +145,7 @@ function App() {
                 type="number"
                 name="precio"
                 value={prodSelec && prodSelec.precio}  
+                onChange={handleChange}
               />
               <br />
               <label>Cantidad </label>
@@ -114,6 +155,7 @@ function App() {
                 name="cantidad"
                 min="0" 
                 max="20"
+                onChange={handleChange}
               />
               <br />
             </div>
@@ -123,10 +165,57 @@ function App() {
           
         </ModalBody>
         <ModalFooter>
-          <button className="btn btn-primary">
+          <button className="btn btn-primary" onClick={()=>addToCartBebida()}>
             Agregar al carrito
           </button>
           <button className="btn btn-danger" onClick={()=>setModalAgregar(false)}>
+            Cancelar
+          </button>
+        </ModalFooter>
+      </Modal>
+
+      <Modal isOpen={modalCarrito} size="xl" >
+        <ModalHeader>
+          <div>
+            <h3>Carrito</h3>
+          </div>
+        </ModalHeader>
+        <ModalBody>
+        <div>
+        <table className="table table-bordered" id="lista-Empleados">
+        <thead>
+          <tr>
+            <th>Id</th>
+            <th>Fotografia</th>
+            <th>Producto</th>
+            <th>Descripcion</th>
+            <th>Precio</th>
+            <th>Cantidad</th>
+            <th>Total</th>
+          </tr>
+        </thead>
+        <tbody>
+          {cart.map(elemento=>(
+            <tr>
+              <td>{elemento.id}</td>
+              <td><img style={{width : '50px'}} src={elemento.imagen}></img> </td>
+              <td>{elemento.nombre}</td>
+              <td>{elemento.descripcion}</td>
+              <td>{elemento.precio}</td>
+              <td>{elemento.cantidad}</td>
+              <td>{elemento.total}</td>
+            </tr>
+          ))
+          }
+        </tbody>
+      </table>  
+        </div>
+        </ModalBody>
+        <ModalFooter>
+          <button className="btn btn-primary" onClick={()=>insertToFirebase()}>
+            Pagar
+          </button>
+          <button className="btn btn-danger" onClick={()=>setModalCarrito(false)}>
             Cancelar
           </button>
         </ModalFooter>
